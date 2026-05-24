@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold-50: #FFFDF0;
+  --color-gold-100: #FEF9C3;
+  --color-gold-400: #FFC107;
+  --color-gold-500: #F5B400;
+  --color-gold-600: #D99B00;
+  --color-accent-red: #E53935;
+  --color-textPrimary: #0F172A;
+  --color-textSecondary: #64748B;
+
+  --font-sans: "Plus Jakarta Sans", Inter, sans-serif;
+  --font-body: Inter, sans-serif;
+  --font-serif: Fraunces, serif;
+
+  --animate-float-slow: float 8s ease-in-out infinite;
+  --animate-float-medium: float 5s ease-in-out infinite;
+  --animate-pulse-glow: pulseGlow 3s ease-in-out infinite;
+  --animate-marquee-infinite: marquee 25s linear infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(1deg); }
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.08); }
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Premium custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 9999px;
+  border: 2px solid #F8FAFC;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
+
+/* Glassmorphism custom enhancements */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.gold-border-gradient {
+  position: relative;
+}
+
+.gold-border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #F5B400, #E53935, #FFC107);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.gold-border-gradient:hover::before {
+  opacity: 1;
+}
+
+/* Custom cursor styling classes */
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(245, 180, 0, 0.3);
+  box-shadow: 0 0 20px rgba(245, 180, 0, 0.6);
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background-color 0.2s;
+}
+
+.custom-cursor-glow {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 180, 0, 0.08) 0%, rgba(245, 180, 0, 0) 70%);
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+}
