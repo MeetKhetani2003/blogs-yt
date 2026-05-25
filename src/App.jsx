@@ -1,6 +1,20 @@
 import { RefreshCw, Share, X, Search, Play, CheckCircle, Menu, Award, PlaySquare, Edit3, Briefcase, Bookmark, FolderOpen, ArrowRight, PlayCircle, Send, CodeXml, Link, ArrowLeft, MessageSquare, Copy, Plus, ChevronRight, Heart, Eye, Code, Mail } from 'lucide-react';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import avatar from "./assets/avatar.jpeg"
+import logo from "./assets/logo.png"
+
+const YoutubeIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+);
+
+const FacebookIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+);
+
+const InstagramIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+);
+
 const INITIAL_ARTICLES = [
     {
         id: 1,
@@ -149,6 +163,7 @@ function App() {
     const [activeTab, setActiveTab] = useState('home');
     const [selectedArticleId, setSelectedArticleId] = useState(1);
     const [articles, setArticles] = useState(INITIAL_ARTICLES);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Search & Filter state for 'articles' section
     const [searchQuery, setSearchQuery] = useState('');
@@ -396,10 +411,9 @@ function App() {
             {/* Top Premium Sticky Header navigation */}
             <header className="sticky top-0 left-0 right-0 z-50 glass-card border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-                    {/* Logo Icon with accent rings */}
-                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-gold-500 to-accent-red flex items-center justify-center text-white font-extrabold text-xl shadow-lg">
-                        TR
-                        <div className="absolute -inset-1 rounded-xl border border-gold-400/30 animate-ping pointer-events-none"></div>
+                    {/* Logo Icon */}
+                    <div className="relative w-12 h-12 flex items-center justify-center">
+                        <img src={logo} alt="Technical Rahul Pandey Logo" className="w-full h-full object-contain" />
                     </div>
                     <div>
                         <h1 className="text-base font-bold tracking-tight text-textPrimary flex items-center gap-2">
@@ -419,10 +433,22 @@ function App() {
                         Home
                     </button>
                     <button
+                        onClick={() => setActiveTab('about')}
+                        className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${activeTab === 'about' ? 'bg-white text-textPrimary shadow-sm' : 'text-textSecondary hover:text-textPrimary'}`}
+                    >
+                        About Us
+                    </button>
+                    <button
                         onClick={() => setActiveTab('articles')}
                         className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${activeTab === 'articles' || activeTab === 'article-view' ? 'bg-white text-textPrimary shadow-sm' : 'text-textSecondary hover:text-textPrimary'}`}
                     >
                         Publications
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('contact')}
+                        className={`px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${activeTab === 'contact' ? 'bg-white text-textPrimary shadow-sm' : 'text-textSecondary hover:text-textPrimary'}`}
+                    >
+                        Contact
                     </button>
                     <button
                         onClick={() => setActiveTab('admin')}
@@ -435,9 +461,23 @@ function App() {
 
                 {/* Quick CTA Actions right */}
                 <div className="flex items-center gap-3">
+                    <div className="hidden lg:flex items-center relative">
+                        <Search className="w-4 h-4 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Search topics..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                if (activeTab !== 'articles') setActiveTab('articles');
+                                setSelectedCategory('All');
+                            }}
+                            className="pl-9 pr-4 py-2 bg-slate-100 border border-slate-200/60 rounded-xl text-xs text-textPrimary placeholder:text-textSecondary focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition-all w-48 focus:w-64"
+                        />
+                    </div>
                     <button
                         onClick={() => { setActiveTab('articles'); setSearchQuery(''); }}
-                        className="p-2.5 rounded-xl hover:bg-slate-100 transition-colors text-textSecondary"
+                        className="lg:hidden p-2.5 rounded-xl hover:bg-slate-100 transition-colors text-textSecondary"
                         title="Search publications"
                     >
                         <Search className="w-4 h-4" />
@@ -450,13 +490,50 @@ function App() {
                     </button>
                     {/* Simple Mobile Menu Trigger */}
                     <button
-                        onClick={() => setActiveTab(activeTab === 'home' ? 'articles' : 'home')}
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className="md:hidden p-2 rounded-xl border border-gray-200"
                     >
-                        <Menu className="w-5 h-5 text-textPrimary" />
+                        {isMobileMenuOpen ? <X className="w-5 h-5 text-textPrimary" /> : <Menu className="w-5 h-5 text-textPrimary" />}
                     </button>
                 </div>
             </header>
+
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden fixed top-[73px] left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl z-40 p-4 flex flex-col gap-2 animate-fadeIn">
+                    <button
+                        onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all text-left ${activeTab === 'home' ? 'bg-slate-100 text-textPrimary' : 'text-textSecondary hover:bg-slate-50'}`}
+                    >
+                        Home
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('about'); setIsMobileMenuOpen(false); }}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all text-left ${activeTab === 'about' ? 'bg-slate-100 text-textPrimary' : 'text-textSecondary hover:bg-slate-50'}`}
+                    >
+                        About Us
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('articles'); setIsMobileMenuOpen(false); }}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all text-left ${activeTab === 'articles' || activeTab === 'article-view' ? 'bg-slate-100 text-textPrimary' : 'text-textSecondary hover:bg-slate-50'}`}
+                    >
+                        Publications
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('contact'); setIsMobileMenuOpen(false); }}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all text-left ${activeTab === 'contact' ? 'bg-slate-100 text-textPrimary' : 'text-textSecondary hover:bg-slate-50'}`}
+                    >
+                        Contact
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('admin'); setIsMobileMenuOpen(false); }}
+                        className={`px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all text-left flex items-center gap-2 ${activeTab === 'admin' ? 'bg-slate-100 text-textPrimary' : 'text-textSecondary hover:bg-slate-50'}`}
+                    >
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Creator Studio
+                    </button>
+                </div>
+            )}
 
             {/* Rendering Lucide icons after state change */}
 
@@ -880,11 +957,11 @@ function App() {
                                             />
 
                                             {/* Central Hover Play Button Trigger */}
-                                            <div className="absolute inset-0 flex items-center justify-center">
+                                            <a href="https://youtube.com/@technicalrahulpandey88?si=3A9H5kv1jDVotrpy" target="_blank" rel="noreferrer" className="absolute inset-0 flex items-center justify-center">
                                                 <div className="w-20 h-20 rounded-full bg-white text-accent-red flex items-center justify-center shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300 cursor-pointer">
                                                     <Play className="w-8 h-8 fill-accent-red translate-x-0.5" />
                                                 </div>
-                                            </div>
+                                            </a>
 
                                             {/* Custom Player Timeline bar overlays */}
                                             <div className="absolute bottom-4 left-6 right-6 flex items-center gap-3">
@@ -918,10 +995,12 @@ function App() {
                                                 { id: "v2", title: "Building next-generation UI with Container Query Hooks", length: "10:45" },
                                                 { id: "v3", title: "Mastering system optimization for high frame rates", length: "18:15" }
                                             ].map(item => (
-                                                <div
+                                                <a
+                                                    href="https://youtube.com/@technicalrahulpandey88?si=3A9H5kv1jDVotrpy"
+                                                    target="_blank"
+                                                    rel="noreferrer"
                                                     key={item.id}
                                                     className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-gold-300 hover:bg-gold-50/20 cursor-pointer transition-all"
-                                                    onClick={() => triggerNotification(`Simulated launching course: ${item.title}`, "info")}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-accent-red">
@@ -930,7 +1009,7 @@ function App() {
                                                         <span className="text-xs font-bold text-textPrimary max-w-xs truncate">{item.title}</span>
                                                     </div>
                                                     <span className="text-[10px] text-textSecondary font-semibold">{item.length}</span>
-                                                </div>
+                                                </a>
                                             ))}
                                         </div>
                                     </div>
@@ -976,6 +1055,62 @@ function App() {
                                     ))}
                                 </div>
 
+                            </div>
+                        </section>
+
+                        { }
+                        {/* SOCIAL CONNECT SECTION */}
+                        <section className="py-20 bg-white px-6 lg:px-20 border-b border-gray-100">
+                            <div className="max-w-7xl mx-auto w-full text-center space-y-12">
+                                <div className="space-y-3">
+                                    <p className="text-xs uppercase tracking-widest font-bold text-gold-600">Connect & Collaborate</p>
+                                    <h3 className="text-3xl sm:text-4xl font-extrabold text-textPrimary">Join the Technical Community</h3>
+                                    <p className="text-sm text-textSecondary font-light max-w-xl mx-auto">
+                                        Follow for daily tech simplifications, behind-the-scenes architectural designs, and live workspace deployments across platforms.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <a href="https://youtube.com/@technicalrahulpandey88?si=3A9H5kv1jDVotrpy" target="_blank" rel="noreferrer" className="group glass-card p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-red-100 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-4">
+                                        <div className="w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition-colors duration-300">
+                                            <YoutubeIcon className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-textPrimary">YouTube</h4>
+                                            <p className="text-xs text-textSecondary">Video Masterclasses</p>
+                                        </div>
+                                    </a>
+
+                                    <a href="https://www.facebook.com/share/1JHwTPsXBC/" target="_blank" rel="noreferrer" className="group glass-card p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-4">
+                                        <div className="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                                            <FacebookIcon className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-textPrimary">Facebook</h4>
+                                            <p className="text-xs text-textSecondary">Community Updates</p>
+                                        </div>
+                                    </a>
+
+                                    <a href="https://www.instagram.com/technicalrahulpandey88?igsh=aWwyYnhweHV1dmgx" target="_blank" rel="noreferrer" className="group glass-card p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-pink-100 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-4">
+                                        <div className="w-14 h-14 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center group-hover:bg-gradient-to-tr group-hover:from-yellow-400 group-hover:via-pink-500 group-hover:to-purple-500 group-hover:text-white transition-all duration-300">
+                                            <InstagramIcon className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-textPrimary">Instagram</h4>
+                                            <p className="text-xs text-textSecondary">Behind the Scenes</p>
+                                        </div>
+                                    </a>
+
+                                    <a href="mailto:rahulkumar913580@gmail.com" className="group glass-card p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-emerald-100 hover:-translate-y-1 transition-all duration-300 flex flex-col items-center gap-4">
+                                        <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                                            <Mail className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-textPrimary">Email</h4>
+                                            <p className="text-xs text-textSecondary">Business Inquiries</p>
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
                         </section>
 
@@ -1392,13 +1527,145 @@ function App() {
                                             Rahul Pandey publishes simplified breakdowns covering core operating mechanisms, artificial intelligence, and structural layouts.
                                         </p>
                                         <div className="flex items-center gap-2 pt-2">
-                                            <button onClick={() => triggerNotification("Follow registered!", "success")} className="w-full bg-white hover:bg-gold-500 hover:text-slate-950 text-textPrimary border border-slate-200 font-bold py-1.5 rounded-lg text-[11px] transition-all">
+                                            <a href="https://www.instagram.com/technicalrahulpandey88?igsh=aWwyYnhweHV1dmgx" target="_blank" rel="noreferrer" className="w-full text-center block bg-white hover:bg-gold-500 hover:text-slate-950 text-textPrimary border border-slate-200 font-bold py-1.5 rounded-lg text-[11px] transition-all">
                                                 Follow
-                                            </button>
+                                            </a>
                                         </div>
                                     </div>
 
                                 </div>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'about' && (
+                    <div className="bg-slate-50 min-h-[90vh] py-16 px-6 lg:px-20 animate-fadeIn">
+                        <div className="max-w-4xl mx-auto w-full space-y-16">
+
+                            <div className="text-center space-y-6">
+                                <span className="bg-gold-50 text-gold-600 border border-gold-400/20 text-xs uppercase font-extrabold tracking-wider px-3 py-1.5 rounded-full">
+                                    The Story
+                                </span>
+                                <h1 className="text-4xl sm:text-6xl font-extrabold text-textPrimary tracking-tight">
+                                    Demystifying Technology <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-500 to-accent-red">For The Modern Builder</span>
+                                </h1>
+                                <p className="text-base sm:text-lg text-textSecondary font-light leading-relaxed max-w-2xl mx-auto">
+                                    We believe that understanding complex computer science shouldn't require a Ph.D. We break down the most sophisticated architectures into elegant, digestible, and actionable components.
+                                </p>
+                            </div>
+
+                            <div className="glass-card rounded-3xl overflow-hidden shadow-xl border border-slate-200">
+                                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80" alt="Team collaborating" className="w-full h-80 object-cover" />
+                                <div className="p-8 sm:p-12 space-y-6 bg-white">
+                                    <h3 className="text-2xl font-bold text-textPrimary">Our Mission</h3>
+                                    <p className="text-textSecondary leading-relaxed font-light">
+                                        Starting as a small initiative in 2018, Technical Rahul Pandey has grown into a premium digital platform trusted by over a million engineers. Our mission is simple: strip away the technical jargon, provide first-principles mental models, and give developers the confidence to build world-class applications.
+                                    </p>
+                                    <p className="text-textSecondary leading-relaxed font-light">
+                                        From local large language model deployments to fluid container query designs, our masterclasses are meticulously structured to save you hundreds of hours of research and debugging.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <div className="glass-card p-8 rounded-3xl border border-slate-100 text-center space-y-4 shadow-sm hover:shadow-md transition-all bg-white">
+                                    <div className="w-12 h-12 mx-auto rounded-full bg-gold-50 text-gold-600 flex items-center justify-center">
+                                        <Award className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="font-bold text-textPrimary">Premium Quality</h4>
+                                    <p className="text-xs text-textSecondary font-light leading-relaxed">Every tutorial is crafted with extreme attention to visual and technical detail.</p>
+                                </div>
+                                <div className="glass-card p-8 rounded-3xl border border-slate-100 text-center space-y-4 shadow-sm hover:shadow-md transition-all bg-white">
+                                    <div className="w-12 h-12 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                        <CodeXml className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="font-bold text-textPrimary">Actionable Code</h4>
+                                    <p className="text-xs text-textSecondary font-light leading-relaxed">No fluff. Just real-world applicable code snippets that work instantly.</p>
+                                </div>
+                                <div className="glass-card p-8 rounded-3xl border border-slate-100 text-center space-y-4 shadow-sm hover:shadow-md transition-all bg-white">
+                                    <div className="w-12 h-12 mx-auto rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                                        <Briefcase className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="font-bold text-textPrimary">Career Growth</h4>
+                                    <p className="text-xs text-textSecondary font-light leading-relaxed">Designed to elevate your architectural mindset and propel your tech career.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'contact' && (
+                    <div className="bg-white min-h-[90vh] py-16 px-6 lg:px-20 animate-fadeIn">
+                        <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+                            <div className="space-y-8">
+                                <div className="space-y-3">
+                                    <p className="text-xs uppercase tracking-widest font-bold text-accent-red">Get in touch</p>
+                                    <h2 className="text-4xl sm:text-5xl font-extrabold text-textPrimary tracking-tight">
+                                        Let's Build Something <br /> Extraordinary.
+                                    </h2>
+                                    <p className="text-sm text-textSecondary font-light leading-relaxed max-w-md">
+                                        Whether you're looking for corporate architectural consulting, sponsorships, or just want to discuss the latest tech trends, our inbox is always open.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-6 pt-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-gold-600 shadow-sm flex-shrink-0">
+                                            <Mail className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-textPrimary">Email Direct</h4>
+                                            <p className="text-xs text-textSecondary font-light mt-1">rahulkumar913580@gmail.com</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-gold-600 shadow-sm flex-shrink-0">
+                                            <MessageSquare className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-textPrimary">Social DMs</h4>
+                                            <p className="text-xs text-textSecondary font-light mt-1">Fastest response via Instagram or Facebook.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="glass-card p-8 sm:p-10 rounded-3xl border border-slate-100 shadow-2xl relative overflow-hidden">
+                                {/* Decorative subtle blur */}
+                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-gold-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                                <form onSubmit={(e) => { e.preventDefault(); triggerNotification("Message sent successfully! We will get back to you shortly.", "success"); }} className="relative z-10 space-y-5">
+                                    <h3 className="text-xl font-bold text-textPrimary mb-6">Send a Message</h3>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-textPrimary uppercase tracking-wider">Full Name</label>
+                                            <input type="text" required placeholder="John Doe" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition-all" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-textPrimary uppercase tracking-wider">Email Address</label>
+                                            <input type="email" required placeholder="john@company.com" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition-all" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-textPrimary uppercase tracking-wider">Subject</label>
+                                        <input type="text" required placeholder="How can we collaborate?" className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition-all" />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-textPrimary uppercase tracking-wider">Message</label>
+                                        <textarea required rows="4" placeholder="Tell us about your project or inquiry..." className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:bg-white transition-all resize-none"></textarea>
+                                    </div>
+
+                                    <button type="submit" className="w-full bg-textPrimary hover:bg-gold-500 hover:text-slate-950 text-white font-bold p-4 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+                                        <Send className="w-4 h-4" /> Send Transmission
+                                    </button>
+                                </form>
                             </div>
 
                         </div>
@@ -1693,10 +1960,10 @@ function App() {
                             Simplifying complex computing mechanics, local AI development pipelines, prompt architectures, and structured software frameworks for ambitious builders worldwide.
                         </p>
                         <div className="flex items-center gap-4 text-slate-400">
-                            <a href="#" className="hover:text-gold-500 transition-colors"><PlaySquare className="w-5 h-5" /></a>
-                            <a href="#" className="hover:text-gold-500 transition-colors"><MessageSquare className="w-5 h-5" /></a>
-                            <a href="#" className="hover:text-gold-500 transition-colors"><CodeXml className="w-5 h-5" /></a>
-                            <a href="#" className="hover:text-gold-500 transition-colors"><Briefcase className="w-5 h-5" /></a>
+                            <a href="https://youtube.com/@technicalrahulpandey88?si=3A9H5kv1jDVotrpy" target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors"><YoutubeIcon className="w-5 h-5" /></a>
+                            <a href="https://www.facebook.com/share/1JHwTPsXBC/" target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors"><FacebookIcon className="w-5 h-5" /></a>
+                            <a href="https://www.instagram.com/technicalrahulpandey88?igsh=aWwyYnhweHV1dmgx" target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors"><InstagramIcon className="w-5 h-5" /></a>
+                            <a href="mailto:rahulkumar913580@gmail.com" className="hover:text-gold-500 transition-colors"><Mail className="w-5 h-5" /></a>
                         </div>
                     </div>
 
