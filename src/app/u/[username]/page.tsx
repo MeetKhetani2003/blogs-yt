@@ -110,8 +110,8 @@ export default async function UserProfilePage({ params }: Props) {
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
                       {user.name}
                       {user.role === 'ADMIN' && (
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gold-50 text-gold-500 shadow-sm border border-gold-100">
-                           <Award className="w-3.5 h-3.5" title="Admin / Author" />
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gold-50 text-gold-500 shadow-sm border border-gold-100" title="Admin / Author">
+                           <Award className="w-3.5 h-3.5" />
                         </span>
                       )}
                     </h1>

@@ -38,10 +38,10 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             const username = await generateUniqueUsername(user.name || 'user');
             
             await User.create({
-              name: user.name,
-              email: user.email,
+              name: user.name || 'User',
+              email: user.email || '',
               username: username,
-              image: user.image,
+              image: user.image || '',
               provider: 'google',
               providerId: account.providerAccountId,
               role: 'USER',
