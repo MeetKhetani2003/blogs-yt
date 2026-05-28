@@ -42,7 +42,7 @@ export async function addComment(blogId: string, content: string) {
 export async function getComments(blogId?: string) {
     try {
         await dbConnect();
-        const query = blogId ? { blog: blogId, status: 'APPROVED' } : {};
+        const query: any = blogId ? { blog: blogId, status: 'APPROVED' } : {};
         const comments = await Comment.find(query)
             .populate('user', 'name image username')
             .populate('blog', 'title slug')

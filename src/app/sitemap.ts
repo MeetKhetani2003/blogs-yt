@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic Blog Routes
   const blogRoutes = blogs.map((blog: any) => ({
     url: `${BASE_URL}/publications/${blog.slug}`,
-    lastModified: new Date(blog.updatedAt).toISOString(),
+    lastModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.9,
   }));
@@ -43,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic Video Routes
   const videoRoutes = videos.map((video: any) => ({
     url: `${BASE_URL}/youtube/${video.slug}`,
-    lastModified: new Date(video.updatedAt).toISOString(),
+    lastModified: video.updatedAt ? new Date(video.updatedAt).toISOString() : new Date().toISOString(),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -51,14 +51,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Taxonomy Routes
   const categoryRoutes = categories.map((cat: any) => ({
     url: `${BASE_URL}/category/${cat.slug}`,
-    lastModified: new Date(cat.updatedAt).toISOString(),
+    lastModified: cat.updatedAt ? new Date(cat.updatedAt).toISOString() : new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.6,
   }));
 
   const hashtagRoutes = hashtags.map((tag: any) => ({
     url: `${BASE_URL}/tag/${tag.slug}`,
-    lastModified: new Date(tag.updatedAt).toISOString(),
+    lastModified: tag.updatedAt ? new Date(tag.updatedAt).toISOString() : new Date().toISOString(),
     changeFrequency: 'weekly' as const,
     priority: 0.5,
   }));

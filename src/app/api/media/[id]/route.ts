@@ -32,7 +32,7 @@ export async function GET(
     // Return the stream directly with headers
     return new NextResponse(stream as any, {
       headers: {
-        'Content-Type': file.contentType || 'image/webp',
+        'Content-Type': (file as any).contentType || 'image/webp',
         'Cache-Control': 'public, max-age=31536000, immutable',
         'Content-Length': file.length.toString(),
       },

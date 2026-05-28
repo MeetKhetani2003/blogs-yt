@@ -58,13 +58,13 @@ export async function POST(req: Request) {
         sizeBytes,
         uploadedBy: session.user.id,
       },
-    });
+    } as any);
 
     const fileId = uploadStream.id;
 
     uploadStream.end(optimizedBuffer);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<NextResponse>((resolve, reject) => {
       uploadStream.on('finish', async () => {
         // Save to GalleryImage schema
         const galleryImage = await GalleryImage.create({
