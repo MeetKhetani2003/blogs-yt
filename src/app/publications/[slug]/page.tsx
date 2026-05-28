@@ -1,8 +1,9 @@
-import { INITIAL_ARTICLES } from '@/data/articles';
+import dbConnect from '@/lib/db';
+import { Blog } from '@/models/Blog';
+import { Category } from '@/models/Category';
+import { User } from '@/models/User';
 import { Metadata } from 'next';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import ClientArticle from '@/components/ClientArticle';
 
 interface Props {
@@ -10,69 +11,67 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  await dbConnect();
   const { slug } = await params;
-  const article = INITIAL_ARTICLES.find((a) => a.slug === slug);
+  const blog = await Blog.findOne({ slug }).populate('author').lean() as any;
   
-  if (!article) {
-    return {
-      title: 'Article Not Found',
-    };
+  if (!blog) {
+    return { title: 'Article Not Found' };
   }
   
   return {
-    title: article.title,
-    description: article.excerpt,
+    title: blog.seoTitle || blog.title,
+    description: blog.metaDescription || blog.excerpt,
+    robots: blog.robots || 'index, follow',
     openGraph: {
-      title: article.title,
-      description: article.excerpt,
+      title: blog.seoTitle || blog.title,
+      description: blog.metaDescription || blog.excerpt,
       type: 'article',
-      publishedTime: article.publishDate,
-      authors: [article.author.name],
+      publishedTime: blog.createdAt?.toISOString(),
+      authors: [blog.author?.name || 'Rahul Pandey'],
       images: [
         {
-          url: article.coverImage,
+          url: blog.heroImage || '/og-image.jpg',
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: blog.title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt,
-      images: [article.coverImage],
+      title: blog.seoTitle || blog.title,
+      description: blog.metaDescription || blog.excerpt,
+      images: [blog.heroImage || '/og-image.jpg'],
     },
     alternates: {
-      canonical: `/publications/${slug}`,
+      canonical: blog.canonicalUrl || `/publications/${slug}`,
     }
   };
 }
 
-export async function generateStaticParams() {
-  return INITIAL_ARTICLES.map((article) => ({
-    slug: article.slug,
-  }));
-}
-
 export default async function ArticlePage({ params }: Props) {
+  await dbConnect();
   const { slug } = await params;
-  const article = INITIAL_ARTICLES.find((a) => a.slug === slug);
+  const blog = await Blog.findOne({ slug })
+      .populate('category')
+      .populate('author')
+      .lean() as any;
   
-  if (!article) {
+  if (!blog) {
     notFound();
   }
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: article.title,
-    description: article.excerpt,
-    image: article.coverImage,
-    datePublished: article.publishDate,
+    headline: blog.title,
+    description: blog.excerpt,
+    image: blog.heroImage,
+    datePublished: blog.createdAt,
     author: {
       "@type": "Person",
-      name: article.author.name,
+      name: blog.author?.name || "Rahul Pandey",
       url: "https://technicalrahul.com",
     },
     publisher: {
@@ -85,6 +84,23 @@ export default async function ArticlePage({ params }: Props) {
     }
   };
 
+  const articleFormat = {
+      id: blog._id.toString(),
+      title: blog.title,
+      excerpt: blog.excerpt,
+      category: blog.category?.name || 'Technology',
+      readTime: blog.readTime || '5 min read',
+      author: {
+          name: blog.author?.name || "Rahul Pandey",
+          role: blog.author?.role || "Author",
+          avatar: blog.author?.image || "https://ui-avatars.com/api/?name=" + (blog.author?.name || 'A')
+      },
+      publishDate: new Date(blog.createdAt).toLocaleDateString(),
+      coverImage: blog.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+      content: blog.content,
+      likes: Math.floor(Math.random() * 500) + 100 // placeholder since likes aren't in schema
+  };
+
   return (
     <>
       <script
@@ -92,7 +108,7 @@ export default async function ArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main className="flex-grow bg-slate-50/50">
-        <ClientArticle article={article} />
+        <ClientArticle article={articleFormat} />
       </main>
     </>
   );

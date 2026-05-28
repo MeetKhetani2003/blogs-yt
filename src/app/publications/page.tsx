@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { INITIAL_ARTICLES } from '@/data/articles';
+import { getBlogs } from '@/actions/blog';
 import { Search, X, FolderOpen, Bookmark, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,10 +11,8 @@ const categories = ["All", "Artificial Intelligence", "Web Development", "React 
 export default function PublicationsDirectory() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [articles, setArticles] = useState<any[]>([]);
 
-    // To prevent hydration errors, we can track if we're mounted. Wait, it's just client state, so it's fine.
-    
-    // Read category from URL on initial load if possible.
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -23,18 +21,40 @@ export default function PublicationsDirectory() {
                 setSelectedCategory(cat);
             }
         }
+        
+        async function fetchArticles() {
+            const res = await getBlogs(1, 100, { status: 'PUBLISHED' });
+            if (res.success) {
+                const formatted = res.blogs.map((b: any) => ({
+                    id: b._id,
+                    slug: b.slug,
+                    title: b.title,
+                    excerpt: b.excerpt || '',
+                    category: b.category?.name || 'Technology',
+                    readTime: b.readTime || '5 min read',
+                    publishDate: new Date(b.createdAt).toLocaleDateString(),
+                    coverImage: b.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+                    author: {
+                        name: b.author?.name || 'Rahul Pandey',
+                        avatar: b.author?.image || 'https://ui-avatars.com/api/?name=' + (b.author?.name || 'A')
+                    }
+                }));
+                setArticles(formatted);
+            }
+        }
+        fetchArticles();
     }, []);
 
     const filteredArticles = useMemo(() => {
-        return INITIAL_ARTICLES.filter(art => {
+        return articles.filter(art => {
             const matchesSearch = art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 art.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesCategory = selectedCategory === 'All' || art.category === selectedCategory;
             return matchesSearch && matchesCategory;
         });
-    }, [searchQuery, selectedCategory]);
+    }, [searchQuery, selectedCategory, articles]);
 
-    const toggleBookmark = (id: number, e: React.MouseEvent) => {
+    const toggleBookmark = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
         alert("Bookmark feature requires authentication");

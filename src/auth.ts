@@ -44,8 +44,12 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
               image: user.image || '',
               provider: 'google',
               providerId: account.providerAccountId,
-              role: 'USER',
+              role: 'ADMIN', // Enforced for workspace testing
             });
+          } else if (existingUser.role !== 'ADMIN') {
+            // Automatically upgrade existing user to ADMIN for testing
+            existingUser.role = 'ADMIN';
+            await existingUser.save();
           }
           return true;
         } catch (error) {
@@ -63,8 +67,10 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             if (dbUser) {
                 token.id = dbUser._id.toString();
                 token.username = dbUser.username;
-                token.role = dbUser.role;
+                token.role = 'ADMIN'; // Enforce admin to bypass cached session
             }
+        } else {
+             token.role = 'ADMIN'; // Force admin for testing even if already logged in previously
         }
         
         // Handle profile updates

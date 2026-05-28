@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
 
 @theme inline {
   --color-gold-50: #FFFDF0;
@@ -38,6 +40,71 @@
   }
 }
 
+/* TipTap Table Styles */
+.ProseMirror table, .tiptap-content table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.ProseMirror td, .tiptap-content td,
+.ProseMirror th, .tiptap-content th {
+  min-width: 1em;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ProseMirror th, .tiptap-content th {
+  font-weight: 700;
+  text-align: left;
+  background-color: #f8fafc;
+}
+
+.ProseMirror .column-resize-handle, .tiptap-content .column-resize-handle {
+  background-color: #adf;
+  bottom: -2px;
+  position: absolute;
+  right: -2px;
+  pointer-events: none;
+  top: 0;
+  width: 4px;
+}
+
+.ProseMirror p, .tiptap-content p {
+  margin: 0 0 1em 0;
+}
+
+/* TipTap YouTube Embed Styles */
+.ProseMirror div[data-youtube-video], .tiptap-content div[data-youtube-video] {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  border-radius: 0.75rem;
+  margin: 2rem 0;
+}
+
+.ProseMirror div[data-youtube-video] iframe, .tiptap-content div[data-youtube-video] iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Ensure images span nicely */
+.tiptap-content img {
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  margin: 2rem auto;
+}
 body {
   background-color: #FFFFFF;
   color: #0F172A;

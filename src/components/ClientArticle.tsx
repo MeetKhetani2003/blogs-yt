@@ -123,7 +123,9 @@ export default function ClientArticle({ article }: { article: any }) {
 
                     {/* CORE ARTICLE TYPOGRAPHY BODY */}
                     <div className="prose max-w-none text-textPrimary font-body text-base sm:text-lg leading-relaxed space-y-6">
-                        {article.body ? (
+                        {article.content ? (
+                            <div className="tiptap-content" dangerouslySetInnerHTML={{ __html: article.content }} />
+                        ) : article.body ? (
                             article.body.split('\n\n').map((para: string, index: number) => {
                                 if (para.startsWith('### ')) {
                                     return <h3 key={index} className="text-xl sm:text-2xl font-bold text-textPrimary pt-4 pb-2 border-b border-slate-100 m-0">{para.replace('### ', '')}</h3>;
