@@ -43,9 +43,18 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   }, [editor]);
 
   const addYoutube = useCallback(() => {
-    const url = prompt('Enter YouTube URL');
-    if (url) {
-      editor.commands.setYoutubeVideo({ src: url });
+    const url = prompt('Enter YouTube URL or paste embed code:');
+    if (!url) return;
+
+    let finalUrl = url;
+    // If the user pasted an entire iframe tag, extract the src
+    const iframeMatch = url.match(/src="([^"]+)"/);
+    if (iframeMatch) {
+      finalUrl = iframeMatch[1];
+    }
+    
+    if (finalUrl) {
+      editor.commands.setYoutubeVideo({ src: finalUrl });
     }
   }, [editor]);
 
@@ -127,14 +136,21 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       </button>
       {editor.isActive('table') && (
           <>
-             <button onClick={() => editor.chain().focus().deleteTable().run()} className={`${btnClass} text-red-500 hover:bg-red-50`} type="button" title="Delete Table">
-               <Trash className="w-4 h-4" />
-             </button>
-             <button onClick={() => editor.chain().focus().addColumnAfter().run()} className={btnClass} type="button" title="Add Column After">
+             <div className="w-px h-5 bg-slate-300 mx-1"></div>
+             <button onClick={() => editor.chain().focus().addColumnAfter().run()} className={btnClass} type="button" title="Add Column">
                <Columns className="w-4 h-4" />
              </button>
-             <button onClick={() => editor.chain().focus().addRowAfter().run()} className={btnClass} type="button" title="Add Row After">
+             <button onClick={() => editor.chain().focus().deleteColumn().run()} className={`${btnClass} text-amber-600`} type="button" title="Delete Column">
+               <span className="text-xs font-bold px-1">Del Col</span>
+             </button>
+             <button onClick={() => editor.chain().focus().addRowAfter().run()} className={btnClass} type="button" title="Add Row">
                <Rows className="w-4 h-4" />
+             </button>
+             <button onClick={() => editor.chain().focus().deleteRow().run()} className={`${btnClass} text-amber-600`} type="button" title="Delete Row">
+               <span className="text-xs font-bold px-1">Del Row</span>
+             </button>
+             <button onClick={() => editor.chain().focus().deleteTable().run()} className={`${btnClass} text-red-500 hover:bg-red-50`} type="button" title="Delete Table">
+               <Trash className="w-4 h-4" />
              </button>
           </>
       )}
@@ -172,7 +188,7 @@ export default function TiptapEditor({ content, onChange }: { content: string, o
     content,
     editorProps: {
         attributes: {
-            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[500px] p-6 text-textPrimary',
+            class: 'focus:outline-none min-h-[500px] text-textPrimary',
         },
     },
     onUpdate: ({ editor }) => {
@@ -183,7 +199,9 @@ export default function TiptapEditor({ content, onChange }: { content: string, o
   return (
     <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
       <MenuBar editor={editor} />
-      <EditorContent editor={editor} />
+      <div className="prose max-w-none p-6 editor-canvas">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }

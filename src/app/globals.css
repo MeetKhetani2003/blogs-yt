@@ -99,12 +99,87 @@
   border: 0;
 }
 
+/* Also support direct iframe output from TipTap */
+.ProseMirror iframe[data-youtube-video], .tiptap-content iframe[data-youtube-video] {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  margin: 2rem 0;
+  border: 0;
+}
+
 /* Ensure images span nicely */
 .tiptap-content img {
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   margin: 2rem auto;
 }
+
+/* Editor Visual Hints */
+.editor-canvas .ProseMirror h1,
+.editor-canvas .ProseMirror h2,
+.editor-canvas .ProseMirror h3,
+.editor-canvas .ProseMirror table,
+.editor-canvas .ProseMirror blockquote {
+  position: relative;
+}
+
+.editor-canvas .ProseMirror h1::before {
+  content: 'H1';
+  position: absolute;
+  left: -2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.editor-canvas .ProseMirror h2::before {
+  content: 'H2';
+  position: absolute;
+  left: -2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.editor-canvas .ProseMirror h3::before {
+  content: 'H3';
+  position: absolute;
+  left: -2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.editor-canvas .ProseMirror table {
+  border: 2px dashed #e2e8f0;
+  margin-top: 1.5rem;
+}
+
+.editor-canvas .ProseMirror table::before {
+  content: 'TABLE';
+  position: absolute;
+  top: -1.2rem;
+  left: 0;
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #94a3b8;
+  font-family: monospace;
+  background: #f8fafc;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.2rem;
+  border: 1px solid #e2e8f0;
+}
+
 body {
   background-color: #FFFFFF;
   color: #0F172A;

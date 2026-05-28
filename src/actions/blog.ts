@@ -88,6 +88,16 @@ export async function getBlogs(page = 1, limit = 10, filter = {}) {
     }
 }
 
+export async function getBlogById(id: string) {
+    try {
+        await dbConnect();
+        const blog = await Blog.findById(id).lean();
+        return { success: true, blog: JSON.parse(JSON.stringify(blog)) };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
 export async function deleteBlog(id: string) {
     try {
         const session = await auth();

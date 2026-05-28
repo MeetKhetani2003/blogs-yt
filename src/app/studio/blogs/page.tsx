@@ -98,9 +98,9 @@ export default function BlogsListPage() {
                                                 <Link href={`/publications/${blog.slug}`} target="_blank" className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors">
                                                     <Eye className="w-4 h-4" />
                                                 </Link>
-                                                {/* <Link href={`/studio/blogs/${blog._id}/edit`} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-md transition-colors">
+                                                <Link href={`/studio/blogs/${blog._id}/edit`} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-md transition-colors">
                                                     <Edit className="w-4 h-4" />
-                                                </Link> */}
+                                                </Link>
                                                 <button onClick={() => handleDelete(blog._id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors">
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>

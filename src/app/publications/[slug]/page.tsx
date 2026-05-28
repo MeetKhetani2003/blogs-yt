@@ -12,6 +12,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await dbConnect();
+  User; // Prevent tree-shaking
   const { slug } = await params;
   const blog = await Blog.findOne({ slug }).populate('author').lean() as any;
   
@@ -52,6 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   await dbConnect();
+  // Prevent Next.js/Turbopack from tree-shaking the models since they are only used in populate
+  Category; User;
   const { slug } = await params;
   const blog = await Blog.findOne({ slug })
       .populate('category')

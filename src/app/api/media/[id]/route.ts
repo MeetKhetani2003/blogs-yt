@@ -4,9 +4,10 @@ import mongoose from 'mongoose';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
     const db = mongoose.connection.db;
     if (!db) {
@@ -17,7 +18,7 @@ export async function GET(
       bucketName: 'media',
     });
 
-    const fileId = new mongoose.mongo.ObjectId(params.id);
+    const fileId = new mongoose.mongo.ObjectId(id);
     
     // Check if file exists
     const files = await bucket.find({ _id: fileId }).toArray();

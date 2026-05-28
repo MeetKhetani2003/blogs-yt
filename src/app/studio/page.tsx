@@ -1,4 +1,5 @@
 import React from 'react';
+import mongoose from 'mongoose';
 import { Activity, Percent, Users, Zap, Database, HardDrive, FileText, Settings, RefreshCw } from 'lucide-react';
 import dbConnect from '@/lib/db';
 import { Blog } from '@/models/Blog';
@@ -20,8 +21,17 @@ export default async function StudioDashboard() {
     const allBlogs = await Blog.find().select('views').lean();
     const totalViews = allBlogs.reduce((acc, curr) => acc + (curr.views || 0), 0);
 
-    // Mock storage metrics for MongoDB
-    const storageUsedMB = (mediaCount * 0.5).toFixed(1); // Rough estimate 500KB per image
+    // Actual storage metrics for MongoDB GridFS
+    let actualStorageBytes = 0;
+    try {
+        const files = await mongoose.connection.db?.collection('uploads.files').find().toArray();
+        if (files) {
+            actualStorageBytes = files.reduce((acc, curr) => acc + (curr.length || 0), 0);
+        }
+    } catch (e) {
+        console.error("Failed to fetch GridFS size:", e);
+    }
+    const storageUsedMB = (actualStorageBytes / (1024 * 1024)).toFixed(2);
     const storageLimitMB = 512; // Free tier
     const storagePercent = (parseFloat(storageUsedMB) / storageLimitMB) * 100;
 

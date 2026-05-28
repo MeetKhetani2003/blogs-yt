@@ -60,15 +60,17 @@ export async function POST(req: Request) {
       },
     });
 
+    const fileId = uploadStream.id;
+
     uploadStream.end(optimizedBuffer);
 
     return new Promise((resolve, reject) => {
-      uploadStream.on('finish', async (uploadedFile) => {
+      uploadStream.on('finish', async () => {
         // Save to GalleryImage schema
         const galleryImage = await GalleryImage.create({
           title: originalName.split('.')[0],
-          url: `/api/media/${uploadedFile._id}`,
-          gridFsId: uploadedFile._id,
+          url: `/api/media/${fileId}`,
+          gridFsId: fileId,
           blurDataUrl,
           width: metadata.width,
           height: metadata.height,
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
         // Track Analytics
         await Analytics.create({
           type: 'UPLOAD',
-          metaData: { sizeBytes, format, fileId: uploadedFile._id }
+          metaData: { sizeBytes, format, fileId }
         });
 
         resolve(NextResponse.json({ success: true, image: galleryImage }, { status: 200 }));
