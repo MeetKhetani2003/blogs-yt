@@ -21,25 +21,31 @@ export default function PublicationsDirectory() {
                 setSelectedCategory(cat);
             }
         }
-        
         async function fetchArticles() {
-            const res = await getBlogs(1, 100, { status: 'PUBLISHED' });
-            if (res.success) {
-                const formatted = res.blogs.map((b: any) => ({
-                    id: b._id,
-                    slug: b.slug,
-                    title: b.title,
-                    excerpt: b.excerpt || '',
-                    category: b.category?.name || 'Technology',
-                    readTime: b.readTime || '5 min read',
-                    publishDate: new Date(b.createdAt).toLocaleDateString(),
-                    coverImage: b.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-                    author: {
-                        name: b.author?.name || 'Rahul Pandey',
-                        avatar: b.author?.image || 'https://ui-avatars.com/api/?name=' + (b.author?.name || 'A')
-                    }
-                }));
-                setArticles(formatted);
+            try {
+                const res = await getBlogs(1, 100, { status: 'PUBLISHED' });
+                console.log("getBlogs response:", res);
+                if (res.success) {
+                    const formatted = res.blogs.map((b: any) => ({
+                        id: b._id,
+                        slug: b.slug,
+                        title: b.title,
+                        excerpt: b.excerpt || '',
+                        category: b.category?.name || 'Technology',
+                        readTime: b.readTime || '5 min read',
+                        publishDate: new Date(b.createdAt).toLocaleDateString(),
+                        coverImage: b.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+                        author: {
+                            name: 'Rahul Pandey',
+                            avatar: '/logo.png'
+                        }
+                    }));
+                    setArticles(formatted);
+                } else {
+                    console.error("Failed to fetch blogs:", res.error);
+                }
+            } catch (err) {
+                console.error("Error calling getBlogs:", err);
             }
         }
         fetchArticles();
@@ -61,14 +67,26 @@ export default function PublicationsDirectory() {
     };
 
     return (
-        <div className="py-12 bg-slate-50/50 min-h-[85vh] px-6 lg:px-20 animate-fadeIn w-full flex-grow">
-            <div className="max-w-7xl mx-auto w-full space-y-8">
+        <div className="relative py-16 lg:py-24 bg-slate-50 min-h-[85vh] px-6 lg:px-20 animate-fadeIn w-full flex-grow overflow-hidden">
+            {/* SUBTLE BACKDROP AMBIENT GLOW */}
+            <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-gold-400/10 rounded-full blur-[100px] pointer-events-none animate-pulse-glow"></div>
+            <div className="absolute top-20 left-1/4 w-[300px] h-[300px] bg-accent-red/5 rounded-full blur-[80px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }}></div>
+            
+            <div className="max-w-7xl mx-auto w-full space-y-12 relative z-10">
 
                 {/* Header Info */}
-                <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-widest font-bold text-gold-600">The Directory</p>
-                    <h2 className="text-2xl sm:text-5xl font-bold text-textPrimary tracking-tight">Technical Publications</h2>
-                    <p className="text-sm text-textSecondary max-w-lg font-normal leading-relaxed">
+                <div className="text-center space-y-6 max-w-3xl mx-auto">
+                    <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200/60 w-fit mx-auto shadow-sm">
+                        <span className="flex h-2 w-2 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-500"></span>
+                        </span>
+                        <span className="text-[11px] font-bold text-slate-800 tracking-wider uppercase">The Directory</span>
+                    </div>
+                    <h2 className="text-4xl sm:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1]">
+                        Technical <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-500 to-amber-500">Publications</span>
+                    </h2>
+                    <p className="text-lg text-slate-600 font-medium leading-relaxed">
                         Search and filter our complete technical collection of simplified tutorials and architectural insights in real time.
                     </p>
                 </div>

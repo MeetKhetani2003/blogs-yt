@@ -82,3 +82,17 @@ export async function saveBlogAction(blogId: string) {
         return { error: 'Failed to perform action' };
     }
 }
+
+export async function checkSavedStatus(blogId: string) {
+    try {
+        const session = await auth();
+        if (!session?.user?.id) return { success: true, isSaved: false };
+        await dbConnect();
+        const user = await User.findById(session.user.id).lean();
+        if (!user) return { success: true, isSaved: false };
+        const hasSaved = user.savedBlogs.map((id: any) => id.toString()).includes(blogId.toString());
+        return { success: true, isSaved: hasSaved };
+    } catch (error) {
+        return { success: false, error: 'Failed to fetch status' };
+    }
+}

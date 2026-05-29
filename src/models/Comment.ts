@@ -6,6 +6,8 @@ export interface IComment extends Document {
   parentComment?: mongoose.Types.ObjectId; // For nested replies
   content: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  likes: mongoose.Types.ObjectId[];
+  isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +19,8 @@ const CommentSchema = new Schema<IComment>(
     parentComment: { type: Schema.Types.ObjectId, ref: 'Comment' },
     content: { type: String, required: true },
     status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'APPROVED' },
+    likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    isPinned: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

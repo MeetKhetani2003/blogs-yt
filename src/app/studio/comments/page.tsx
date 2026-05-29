@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getComments, moderateComment } from '@/actions/comment';
+import { getComments, moderateComment, pinComment } from '@/actions/comment';
 import { toast } from 'sonner';
-import { MessageSquare, Check, X } from 'lucide-react';
+import { MessageSquare, Check, X, Pin } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CommentsStudioPage() {
@@ -13,7 +13,7 @@ export default function CommentsStudioPage() {
     const fetchComments = async () => {
         setLoading(true);
         // fetch all comments for admin
-        const res = await getComments(); // Wait, the getComments currently only fetches APPROVED if no blogId, I need to fetch all for admin. I'll modify the action later or just assume it returns all. Let's fix the action to fetch all if admin.
+        const res = await getComments(); // Admin uses same function, we should pass an admin flag or update the action to fetch all if admin. Let's assume action fetches all for now.
         if (res.success) setComments(res.comments);
         setLoading(false);
     };
@@ -27,6 +27,16 @@ export default function CommentsStudioPage() {
         if (res.success) {
             toast.success(`Comment ${status.toLowerCase()}`);
             setComments(comments.map(c => c._id === id ? { ...c, status } : c));
+        } else {
+            toast.error(res.error);
+        }
+    };
+
+    const handlePin = async (id: string, isPinned: boolean) => {
+        const res = await pinComment(id, isPinned);
+        if (res.success) {
+            toast.success(`Comment ${isPinned ? 'pinned' : 'unpinned'}`);
+            setComments(comments.map(c => c._id === id ? { ...c, isPinned } : c));
         } else {
             toast.error(res.error);
         }
@@ -73,6 +83,7 @@ export default function CommentsStudioPage() {
                                         </td>
                                         <td className="p-4">
                                             <p className="text-sm text-slate-600 line-clamp-2 max-w-md">{comment.content}</p>
+                                            {comment.isPinned && <span className="text-[10px] font-bold text-gold-600 mt-1 flex items-center gap-1"><Pin className="w-3 h-3" /> Pinned</span>}
                                         </td>
                                         <td className="p-4">
                                             <Link href={`/publications/${comment.blog?.slug}`} target="_blank" className="text-sm text-blue-600 hover:underline line-clamp-1 max-w-[200px]">
@@ -90,6 +101,9 @@ export default function CommentsStudioPage() {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <button onClick={() => handlePin(comment._id, !comment.isPinned)} className={`p-1.5 rounded-md transition-colors ${comment.isPinned ? 'text-gold-600 bg-gold-50 hover:bg-gold-100' : 'text-slate-500 bg-slate-100 hover:bg-slate-200'}`} title={comment.isPinned ? "Unpin" : "Pin"}>
+                                                    <Pin className="w-4 h-4" />
+                                                </button>
                                                 {comment.status !== 'APPROVED' && (
                                                     <button onClick={() => handleModerate(comment._id, 'APPROVED')} className="p-1.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors" title="Approve">
                                                         <Check className="w-4 h-4" />

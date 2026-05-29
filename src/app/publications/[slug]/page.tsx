@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: blog.metaDescription || blog.excerpt,
       type: 'article',
       publishedTime: blog.createdAt?.toISOString(),
-      authors: [blog.author?.name || 'Rahul Pandey'],
+      authors: ['Rahul Pandey'],
       images: [
         {
           url: blog.heroImage || '/og-image.jpg',
@@ -74,7 +74,7 @@ export default async function ArticlePage({ params }: Props) {
     datePublished: blog.createdAt,
     author: {
       "@type": "Person",
-      name: blog.author?.name || "Rahul Pandey",
+      name: "Rahul Pandey",
       url: "https://technicalrahul.com",
     },
     publisher: {
@@ -94,13 +94,14 @@ export default async function ArticlePage({ params }: Props) {
       category: blog.category?.name || 'Technology',
       readTime: blog.readTime || '5 min read',
       author: {
-          name: blog.author?.name || "Rahul Pandey",
-          role: blog.author?.role || "Author",
-          avatar: blog.author?.image || "https://ui-avatars.com/api/?name=" + (blog.author?.name || 'A')
+          name: "Rahul Pandey",
+          role: "Founder & Technical Architect",
+          avatar: "/logo.png"
       },
       publishDate: new Date(blog.createdAt).toLocaleDateString(),
       coverImage: blog.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
       content: blog.content,
+      sections: blog.sections || [],
       likes: Math.floor(Math.random() * 500) + 100 // placeholder since likes aren't in schema
   };
 

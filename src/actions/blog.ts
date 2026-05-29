@@ -71,6 +71,9 @@ export async function updateBlog(id: string, data: Partial<IBlog>) {
 export async function getBlogs(page = 1, limit = 10, filter = {}) {
     try {
         await dbConnect();
+        // Prevent tree shaking of models required for population
+        if (!Category || !Hashtag || !User) console.log("Models missing");
+
         const skip = (page - 1) * limit;
         const blogs = await Blog.find(filter)
             .populate('category')

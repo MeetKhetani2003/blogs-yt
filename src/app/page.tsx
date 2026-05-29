@@ -2,9 +2,20 @@ import Link from 'next/link';
 import { ArrowRight, Play, Eye, Code, Award, ChevronRight, Bookmark } from 'lucide-react';
 import { INITIAL_ARTICLES } from '@/data/articles';
 import Image from 'next/image';
-import Newsletter from '@/components/Newsletter';
+import FeaturedBlogs from '@/components/FeaturedBlogs';
+import MediaGallerySection from '@/components/MediaGallerySection';
+import dbConnect from '@/lib/db';
+import { Blog } from '@/models/Blog';
+import { GalleryImage } from '@/models/GalleryImage';
+import { YoutubeVideo } from '@/models/YoutubeVideo';
 
-export default function Home() {
+export default async function Home() {
+    await dbConnect();
+    const featuredBlogs = await Blog.find({ isFeatured: true, status: 'PUBLISHED' }).populate('category').sort({ createdAt: -1 }).limit(10).lean();
+    const latestBlogs = await Blog.find({ status: 'PUBLISHED' }).populate('category').sort({ createdAt: -1 }).limit(8).lean();
+    const images = await GalleryImage.find().sort({ createdAt: -1 }).limit(10).lean();
+    const videos = await YoutubeVideo.find().sort({ createdAt: -1 }).limit(10).lean();
+
     return (
         <div className="animate-fadeIn">
             {/* SUBTLE BACKDROP AMBIENT GLOW */}
@@ -126,182 +137,50 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* LUXURY INTERACTIVE CATEGORIES */}
+            <FeaturedBlogs blogs={JSON.parse(JSON.stringify(featuredBlogs))} />
+            <MediaGallerySection images={JSON.parse(JSON.stringify(images))} videos={JSON.parse(JSON.stringify(videos))} />
+
+            {/* LATEST PUBLICATIONS GRID */}
             <section className="py-16 bg-white px-6 lg:px-20 border-b border-gray-100">
                 <div className="max-w-7xl mx-auto w-full">
                     <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12">
                         <div>
-                            <p className="text-xs uppercase tracking-widest font-bold text-gold-600 mb-2">Curated Frameworks</p>
-                            <h3 className="text-2xl sm:text-3xl font-bold text-textPrimary">Targeted Content Centers</h3>
+                            <p className="text-xs uppercase tracking-widest font-bold text-gold-600 mb-2">Recent Publications</p>
+                            <h3 className="text-2xl sm:text-3xl font-bold text-textPrimary">Latest Technical Insights</h3>
                         </div>
-                        <p className="text-sm text-textSecondary max-w-sm mt-3 md:mt-0">
-                            Unlock detailed structured insights divided by strategic development topics. Designed to minimize searching and maximize deep understanding.
-                        </p>
-                    </div>
-
-                    {/* Category Bento Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { title: "Artificial Intelligence", desc: "Quantized Local LLMs, Neural pipelines, prompt systems, and fine-tuning engineering.", count: 24, icon: Code, color: "from-amber-500 to-gold-400" },
-                            { title: "Web Architecture", desc: "High-throughput React components, CSS layouts, and modern rendering engines.", count: 18, icon: Code, color: "from-blue-600 to-cyan-400" },
-                            { title: "SaaS Dev Tools", desc: "Linear-style UI systems, local terminal environments, and custom database stacks.", count: 15, icon: Code, color: "from-purple-600 to-indigo-500" },
-                            { title: "Creator Strategy", desc: "Editorial blueprint, subscriber scale engines, and high-trust platform mechanics.", count: 12, icon: Award, color: "from-emerald-600 to-teal-400" }
-                        ].map((cat, idx) => (
-                            <Link
-                                key={idx}
-                                href={`/publications?category=${encodeURIComponent(cat.title)}`}
-                                className="group cursor-pointer glass-card p-6 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 border border-slate-100 hover:border-gold-400/20 block"
-                            >
-                                <div className={`absolute left-0 right-0 top-0 h-1.5 bg-gradient-to-r ${cat.color}`}></div>
-
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200/50 flex items-center justify-center text-slate-700 group-hover:bg-gold-500 group-hover:text-white transition-all duration-300">
-                                        <cat.icon className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-xs font-bold text-textSecondary bg-slate-100 px-2.5 py-1 rounded-full group-hover:bg-gold-50 group-hover:text-gold-600 transition-colors">
-                                        {cat.count} Articles
-                                    </span>
-                                </div>
-
-                                <h4 className="text-base font-bold text-textPrimary group-hover:text-gold-600 transition-colors">{cat.title}</h4>
-                                <p className="text-xs text-textSecondary mt-2 leading-relaxed">{cat.desc}</p>
-
-                                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-gold-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    Browse Library <ChevronRight className="w-3.5 h-3.5" />
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* EDITORIAL ASYMMETRICAL MAGAZINE GRID */}
-            <section className="py-20 bg-slate-50/50 px-6 lg:px-20 border-b border-gray-100">
-                <div className="max-w-7xl mx-auto w-full">
-                    <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12">
-                        <div>
-                            <p className="text-xs uppercase tracking-widest font-bold text-gold-600 mb-2">Magazine Layout</p>
-                            <h3 className="text-2xl sm:text-3xl font-bold text-textPrimary">Featured Technical Insights</h3>
-                        </div>
-                        <Link
-                            href="/publications"
-                            className="text-sm font-bold text-gold-600 hover:text-gold-500 flex items-center gap-1 group mt-3 md:mt-0"
-                        >
-                            View all articles
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <Link href="/publications" className="text-sm font-bold text-gold-600 hover:text-gold-500 flex items-center gap-1 group mt-3 md:mt-0">
+                            View all articles <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Left Column: Big Hero Feature (Col-span 7) */}
-                        <div className="lg:col-span-7 flex flex-col justify-between">
-                            {INITIAL_ARTICLES.filter(a => a.id === 1).map(hero => (
-                                <Link
-                                    href={`/publications/${hero.slug}`}
-                                    key={hero.id}
-                                    className="group cursor-pointer glass-card rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col justify-between border border-slate-100 block"
-                                >
-                                    <div className="relative aspect-[16/10] overflow-hidden">
-                                        <Image width={800} height={500} src={hero.coverImage} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700" alt={hero.title} />
-                                        <div className="absolute top-4 left-4">
-                                            <span className="bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/50 text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 rounded-full">
-                                                {hero.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-8 space-y-4 flex-1 flex flex-col justify-between">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-4 text-xs font-semibold text-textSecondary">
-                                                <span>{hero.publishDate}</span>
-                                                <span>•</span>
-                                                <span>{hero.readTime}</span>
-                                            </div>
-                                            <h4 className="text-2xl sm:text-3xl font-bold text-textPrimary leading-snug group-hover:text-gold-600 transition-colors">
-                                                {hero.title}
-                                            </h4>
-                                            <p className="text-sm text-textSecondary font-normal leading-relaxed">
-                                                {hero.excerpt}
-                                            </p>
-                                        </div>
-                                        <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <Image width={36} height={36} src={hero.author.avatar} className="w-9 h-9 rounded-full border border-gray-100" alt="Rahul Pandey" />
-                                                <div>
-                                                    <p className="text-xs font-bold text-textPrimary">{hero.author.name}</p>
-                                                    <p className="text-[10px] text-textSecondary">{hero.author.role}</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-xs font-bold text-gold-600 flex items-center gap-1 group-hover:gap-2 transition-all">
-                                                Read Article <ChevronRight className="w-4 h-4" />
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-
-                        {/* Right Column: 2 Medium Layout Articles (Col-span 5) */}
-                        <div className="lg:col-span-5 flex flex-col gap-8">
-                            {INITIAL_ARTICLES.filter(a => a.id === 2 || a.id === 3).map(art => (
-                                <Link
-                                    href={`/publications/${art.slug}`}
-                                    key={art.id}
-                                    className="group cursor-pointer glass-card rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex-1 flex flex-col justify-between border border-slate-100 block"
-                                >
-                                    <div className="relative h-44 overflow-hidden">
-                                        <Image width={600} height={200} src={art.coverImage} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700" alt={art.title} />
-                                        <div className="absolute top-3 left-3">
-                                            <span className="bg-slate-900/90 text-white text-[9px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">
-                                                {art.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-6 flex-1 flex flex-col justify-between">
-                                        <div className="space-y-2 mb-4">
-                                            <div className="flex items-center gap-3 text-[11px] font-semibold text-textSecondary">
-                                                <span>{art.publishDate}</span>
-                                                <span>•</span>
-                                                <span>{art.readTime}</span>
-                                            </div>
-                                            <h5 className="text-lg font-bold text-textPrimary leading-snug group-hover:text-gold-600 transition-colors">
-                                                {art.title}
-                                            </h5>
-                                        </div>
-                                        <div className="flex items-center justify-between pt-4 border-t border-slate-100/50">
-                                            <div className="flex items-center gap-2">
-                                                <Image width={28} height={28} src={art.author.avatar} className="w-7 h-7 rounded-full" alt="Author" />
-                                                <span className="text-[11px] font-semibold text-textPrimary">{art.author.name}</span>
-                                            </div>
-                                            <span className="text-xs font-bold text-gold-600 flex items-center gap-1">
-                                                Read <ChevronRight className="w-3.5 h-3.5" />
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Remaining small articles */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                        {INITIAL_ARTICLES.filter(a => a.id > 3 && a.id <= 6).map(art => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {latestBlogs.map((blog: any) => (
                             <Link
-                                href={`/publications/${art.slug}`}
-                                key={art.id}
-                                className="group cursor-pointer glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border border-slate-100 flex flex-col justify-between block"
+                                href={`/publications/${blog.slug}`}
+                                key={blog._id}
+                                className="group cursor-pointer glass-card rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 border border-slate-100 flex flex-col"
                             >
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-gold-600 tracking-wider uppercase bg-gold-50 px-2 py-0.5 rounded border border-gold-200/50">
-                                            {art.category}
+                                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                                    <Image width={400} height={300} src={blog.heroImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={blog.title} />
+                                    <div className="absolute top-3 left-3">
+                                        <span className="bg-slate-900/90 text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">
+                                            {(blog.category as any)?.name || 'Technology'}
                                         </span>
                                     </div>
-                                    <h5 className="text-base font-bold text-textPrimary leading-snug group-hover:text-gold-600 transition-colors">
-                                        {art.title}
-                                    </h5>
-                                    <p className="text-xs text-textSecondary line-clamp-2 leading-relaxed font-normal">
-                                        {art.excerpt}
-                                    </p>
+                                </div>
+                                <div className="p-5 flex flex-col flex-grow bg-white">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 mb-2 uppercase tracking-wide">
+                                        <span>{new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                        <span>•</span>
+                                        <span>{blog.readTime || '5 min read'}</span>
+                                    </div>
+                                    <h4 className="text-base font-bold text-textPrimary group-hover:text-gold-600 transition-colors line-clamp-2 leading-snug mb-2">{blog.title}</h4>
+                                    <p className="text-xs text-textSecondary line-clamp-2 leading-relaxed flex-grow">{blog.excerpt}</p>
+                                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                        <span className="text-xs font-bold text-gold-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+                                            Read Article <ChevronRight className="w-3.5 h-3.5" />
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
@@ -442,8 +321,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-
-            <Newsletter />
         </div>
     );
 }

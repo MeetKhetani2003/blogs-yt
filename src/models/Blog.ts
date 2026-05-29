@@ -21,6 +21,7 @@ export interface IBlog extends Document {
   isFeatured: boolean;
   views: number;
   readTime: string;
+  sections?: { id: string; title: string }[];
   seoScore?: number;
   seoSuggestions?: string[];
   robots?: string;
@@ -56,6 +57,10 @@ const BlogSchema = new Schema<IBlog>(
     seoScore: { type: Number },
     seoSuggestions: [{ type: String }],
     robots: { type: String, default: 'index, follow' },
+    sections: [{
+      id: { type: String },
+      title: { type: String }
+    }],
   },
   { timestamps: true }
 );

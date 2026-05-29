@@ -15,7 +15,14 @@ interface Props {
 
 async function getUser(username: string) {
   await dbConnect();
-  const user = await User.findOne({ username }).lean() as IUser;
+  const user = await User.findOne({ username }).lean() as any;
+  if (user && user.savedBlogs && user.savedBlogs.length > 0) {
+      const { Blog } = await import('@/models/Blog');
+      const blogs = await Blog.find({ _id: { $in: user.savedBlogs } }).populate('category').lean();
+      user.savedBlogs = blogs;
+  } else if (user) {
+      user.savedBlogs = [];
+  }
   return user;
 }
 
@@ -52,9 +59,9 @@ export default async function UserProfilePage({ params }: Props) {
   const session = await auth();
   const isOwner = session?.user?.username === user.username;
 
-  // Mock mapped blogs for UI purposes
-  const savedBlogs = INITIAL_ARTICLES.slice(0, 2);
-  const reviewedBlogs = INITIAL_ARTICLES.slice(2, 4);
+  // Actual saved blogs from populated data
+  const savedBlogs = user.savedBlogs || [];
+  const reviewedBlogs = INITIAL_ARTICLES.slice(2, 4); // Keep reviews mocked or fetch comments if needed
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -156,11 +163,11 @@ export default async function UserProfilePage({ params }: Props) {
               </h3>
               
               <div className="space-y-4">
-                {savedBlogs.length > 0 ? savedBlogs.map((blog) => (
-                  <Link href={`/publications/${blog.slug}`} key={blog.id} className="block bg-white p-5 rounded-[1.5rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                {savedBlogs.length > 0 ? savedBlogs.map((blog: any) => (
+                  <Link href={`/publications/${blog.slug}`} key={blog._id} className="block bg-white p-5 rounded-[1.5rem] border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
                     <div className="flex flex-col sm:flex-row gap-5">
                       <div className="relative w-full sm:w-40 h-40 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
-                        <Image src={blog.coverImage} fill alt={blog.title} className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                        <Image src={blog.heroImage || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80'} fill alt={blog.title} className="object-cover group-hover:scale-110 transition-transform duration-700" />
                       </div>
                       <div className="flex flex-col justify-between py-1">
                         <div className="space-y-1.5">
@@ -170,7 +177,7 @@ export default async function UserProfilePage({ params }: Props) {
                             <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed hidden sm:block">{blog.excerpt}</p>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-4 sm:mt-0">
-                          <span className="bg-slate-100 px-2 py-1 rounded-md">{blog.category}</span>
+                          <span className="bg-slate-100 px-2 py-1 rounded-md">{blog.category?.name || 'Technology'}</span>
                           <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-gold-500" /> Saved Item</span>
                         </div>
                       </div>

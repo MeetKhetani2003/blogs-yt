@@ -181,10 +181,12 @@
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: #FAFAFA;
   color: #0F172A;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Premium custom scrollbar styling */
@@ -209,9 +211,11 @@ body {
 
 /* Glassmorphism custom enhancements */
 .glass-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(15, 23, 42, 0.05);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
 }
 
 .gold-border-gradient {

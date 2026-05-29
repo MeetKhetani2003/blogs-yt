@@ -24,6 +24,8 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
     const [hashtags, setHashtags] = useState<any[]>([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [sections, setSections] = useState<{id: string, title: string}[]>([]);
 
     // SEO States
     const [seoTitle, setSeoTitle] = useState('');
@@ -56,6 +58,8 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
                 setMetaDescription(b.metaDescription || '');
                 setFocusKeywords(b.focusKeywords ? b.focusKeywords.join(', ') : '');
                 setRobots(b.robots || 'index, follow');
+                setIsFeatured(b.isFeatured || false);
+                setSections(b.sections || []);
             } else {
                 toast.error('Failed to load blog');
             }
@@ -117,6 +121,8 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
             metaDescription,
             focusKeywords: focusKeywords.split(',').map(k => k.trim()).filter(Boolean),
             robots,
+            isFeatured,
+            sections,
             status,
         });
 
@@ -193,6 +199,53 @@ export default function BlogEditorPage({ params }: { params: Promise<{ id: strin
                             <div className="flex gap-2 mt-2">
                                 <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="Or create new..." className="flex-1 p-2 border border-slate-200 rounded-lg text-xs" />
                                 <button type="button" onClick={handleCreateInlineCategory} disabled={isCreatingCategory} className="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-gold-500 hover:text-slate-900">Add</button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 border-t border-slate-100 pt-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} className="w-4 h-4 text-gold-500 border-slate-300 rounded focus:ring-gold-500" />
+                                <span className="text-xs font-bold text-slate-500 uppercase">Featured Post</span>
+                            </label>
+                        </div>
+
+                        <div className="space-y-3 border-t border-slate-100 pt-4">
+                            <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center justify-between">
+                                Table of Contents
+                                <button 
+                                    type="button" 
+                                    onClick={() => setSections([...sections, { id: '', title: '' }])}
+                                    className="text-gold-600 hover:text-gold-700 font-bold"
+                                >
+                                    + Add
+                                </button>
+                            </h4>
+                            <div className="space-y-2">
+                                {sections.map((section, idx) => (
+                                    <div key={idx} className="flex flex-col gap-1.5 p-2 border border-slate-100 rounded-lg bg-slate-50">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-slate-400">SECTION {idx + 1}</span>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setSections(sections.filter((_, i) => i !== idx))}
+                                                className="text-red-400 hover:text-red-500 text-[10px] font-bold"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <input type="text" placeholder="Title (e.g. Introduction)" value={section.title} onChange={(e) => {
+                                            const newSec = [...sections];
+                                            newSec[idx].title = e.target.value;
+                                            setSections(newSec);
+                                        }} className="w-full p-2 border border-slate-200 rounded text-xs" />
+                                        <input type="text" placeholder="ID (e.g. intro)" value={section.id} onChange={(e) => {
+                                            const newSec = [...sections];
+                                            newSec[idx].id = e.target.value;
+                                            setSections(newSec);
+                                        }} className="w-full p-2 border border-slate-200 rounded text-xs" />
+                                    </div>
+                                ))}
+                                {sections.length === 0 && <p className="text-[10px] text-slate-400 italic">No sections added yet.</p>}
                             </div>
                         </div>
 

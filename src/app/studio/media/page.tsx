@@ -1,12 +1,24 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, ImageIcon, File as FileIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { getGalleryImages } from '@/actions/gallery';
 
 export default function MediaLibraryPage() {
-    const [images, setImages] = useState<any[]>([]); // Need an API to fetch them
+    const [images, setImages] = useState<any[]>([]); 
     const [uploading, setUploading] = useState(false);
+
+    const fetchImages = async () => {
+        const res = await getGalleryImages();
+        if (res.success) {
+            setImages(res.images);
+        }
+    };
+
+    useEffect(() => {
+        fetchImages();
+    }, []);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;

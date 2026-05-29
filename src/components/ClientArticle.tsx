@@ -3,34 +3,102 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Bookmark, Heart, Share, PlaySquare, ChevronRight, MessageSquare, ArrowLeft, Link as LinkIcon, Copy, Send } from 'lucide-react';
+import { Bookmark, Heart, Share, PlaySquare, ChevronRight, MessageSquare, ArrowLeft, Link as LinkIcon, Copy, Send, Reply, Pin } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { getComments, addComment, likeComment } from '@/actions/comment';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { toast } from 'sonner';
+
+import { saveBlogAction, checkSavedStatus } from '@/actions/user.actions';
 
 export default function ClientArticle({ article }: { article: any }) {
     const [articleComments, setArticleComments] = useState<any[]>([]);
-    const [newCommentAuthor, setNewCommentAuthor] = useState('');
     const [newCommentContent, setNewCommentContent] = useState('');
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+    const [isSaved, setIsSaved] = useState(false);
+    const [headings, setHeadings] = useState<{ id: string; text: string }[]>([]);
+    const { data: session } = useSession();
+    const recaptchaRef = React.useRef<any>(null);
 
-    const toggleBookmark = (id: number, e: React.MouseEvent) => {
+    React.useEffect(() => {
+        fetchComments();
+        checkSaved();
+    }, [article.id]);
+
+    React.useEffect(() => {
+        // Extract headings for TOC
+        if (article.sections && article.sections.length > 0) {
+            setHeadings(article.sections);
+        } else {
+            const articleElement = document.querySelector('.prose');
+            if (articleElement) {
+                const headingElements = Array.from(articleElement.querySelectorAll('h3, h2'));
+                const extractedHeadings = headingElements.map((h, index) => {
+                    const id = h.id || `heading-${index}`;
+                    h.id = id;
+                    return { id, text: h.textContent || '' };
+                });
+                setHeadings(extractedHeadings);
+            }
+        }
+    }, [article.content, article.body, article.sections]);
+
+    const checkSaved = async () => {
+        const res = await checkSavedStatus(article.id);
+        if (res.success && res.isSaved !== undefined) {
+            setIsSaved(res.isSaved);
+        }
+    };
+
+    const fetchComments = async () => {
+        const res = await getComments(article.id);
+        if (res.success) {
+            setArticleComments(res.comments);
+        }
+    };
+
+    const toggleBookmark = async (id: string, e: React.MouseEvent) => {
         e.preventDefault();
-        alert("Bookmark feature requires authentication");
+        if (!session) return toast.error("Bookmark feature requires authentication");
+        const res = await saveBlogAction(article.id);
+        if (res.success && res.isSaved !== undefined) {
+            setIsSaved(res.isSaved);
+            toast.success(res.isSaved ? "Blog saved to profile!" : "Blog removed from profile");
+        } else {
+            toast.error(res.error || "Failed to save blog");
+        }
     };
 
     const handleCopy = (text: string, message: string = "Copied!") => {
         navigator.clipboard.writeText(text);
-        alert(message);
+        toast.success(message);
     };
 
-    const handleAddComment = (e: React.FormEvent) => {
+    const handleAddComment = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (newCommentAuthor && newCommentContent) {
-            setArticleComments([...articleComments, {
-                id: Date.now(),
-                author: newCommentAuthor,
-                content: newCommentContent,
-                date: "Just now"
-            }]);
-            setNewCommentAuthor('');
+        if (!session) return toast.error("Please login to comment");
+        if (!newCommentContent) return toast.error("Comment cannot be empty");
+        if (!recaptchaToken) return toast.error("Please verify reCAPTCHA");
+
+        const res = await addComment(article.id, newCommentContent, replyingTo || undefined, recaptchaToken);
+        if (res.success) {
+            toast.success("Comment posted!");
             setNewCommentContent('');
+            setReplyingTo(null);
+            setRecaptchaToken(null);
+            if (recaptchaRef.current) recaptchaRef.current.reset();
+            fetchComments();
+        } else {
+            toast.error(res.error || "Failed to post comment");
+        }
+    };
+
+    const handleLikeComment = async (commentId: string) => {
+        if (!session) return toast.error("Please login to like");
+        const res = await likeComment(commentId);
+        if (res.success) {
+            fetchComments();
         }
     };
 
@@ -66,10 +134,10 @@ export default function ClientArticle({ article }: { article: any }) {
                         </Link>
                         <button
                             onClick={(e) => toggleBookmark(article.id, e)}
-                            className="w-10 h-10 rounded-full border border-slate-200 hover:bg-slate-50 flex items-center justify-center text-textSecondary hover:text-gold-500 transition-colors"
+                            className={`w-10 h-10 rounded-full border border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors ${isSaved ? 'text-gold-500' : 'text-textSecondary hover:text-gold-500'}`}
                             title="Bookmark"
                         >
-                            <Bookmark className="w-4 h-4" />
+                            <Bookmark className="w-4 h-4" fill={isSaved ? "currentColor" : "none"} />
                         </button>
                         <button
                             onClick={() => handleCopy(window.location.href, "Article link saved to clipboard!")}
@@ -176,7 +244,7 @@ export default function ClientArticle({ article }: { article: any }) {
                     </div>
 
                     {/* COMMENTS SECTION DESIGN */}
-                    <section className="pt-12 space-y-6">
+                    <section className="pt-12 space-y-6" id="comments">
                         <h4 className="text-xl font-bold text-textPrimary flex items-center gap-2">
                             Discussion Board
                             <span className="bg-slate-100 text-textSecondary text-xs px-2.5 py-0.5 rounded-full font-semibold">
@@ -184,42 +252,116 @@ export default function ClientArticle({ article }: { article: any }) {
                             </span>
                         </h4>
 
-                        <form onSubmit={handleAddComment} className="glass-card p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                            <p className="text-xs font-bold text-textPrimary">Join the tech discussion</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <input
-                                    type="text"
-                                    value={newCommentAuthor}
-                                    onChange={(e) => setNewCommentAuthor(e.target.value)}
-                                    placeholder="Your Name"
-                                    className="sm:col-span-1 p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-textPrimary focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all"
-                                />
-                                <input
-                                    type="text"
+                        {/* MAIN COMMENT FORM */}
+                        {!replyingTo && (
+                            <form onSubmit={handleAddComment} className="glass-card p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                <p className="text-xs font-bold text-textPrimary">Join the tech discussion</p>
+                                
+                                <textarea
                                     value={newCommentContent}
                                     onChange={(e) => setNewCommentContent(e.target.value)}
                                     placeholder="Write a constructive, thoughtful comment..."
-                                    className="sm:col-span-2 p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-textPrimary focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all"
+                                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-textPrimary focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all resize-none min-h-[80px]"
                                 />
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    type="submit"
-                                    className="bg-textPrimary hover:bg-gold-500 hover:text-slate-950 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex items-center gap-1.5"
-                                >
-                                    Publish Comment <Send className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        </form>
+                                
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITEKEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // Use dummy fallback for local if not set
+                                        onChange={(val) => setRecaptchaToken(val)}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="bg-textPrimary hover:bg-gold-500 hover:text-slate-950 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                                        disabled={!session}
+                                    >
+                                        {session ? "Publish Comment" : "Login to Comment"} <Send className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </form>
+                        )}
 
                         <div className="space-y-4">
-                            {articleComments.map(comment => (
-                                <div key={comment.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                            {articleComments.filter(c => !c.parentComment).map(comment => (
+                                <div key={comment._id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 relative">
+                                    {comment.isPinned && (
+                                        <div className="absolute top-0 right-4 -translate-y-1/2 bg-gold-500 text-slate-900 px-2 py-0.5 rounded shadow-sm text-[10px] font-bold flex items-center gap-1">
+                                            <Pin className="w-3 h-3" /> Pinned
+                                        </div>
+                                    )}
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-textPrimary">{comment.author}</span>
-                                        <span className="text-[10px] text-textSecondary">{comment.date}</span>
+                                        <div className="flex items-center gap-2">
+                                            {comment.user?.image ? (
+                                                <Image src={comment.user.image} width={24} height={24} alt="Avatar" className="rounded-full" />
+                                            ) : (
+                                                <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">{comment.user?.name?.charAt(0)}</div>
+                                            )}
+                                            <span className="text-xs font-bold text-textPrimary">{comment.user?.name}</span>
+                                        </div>
+                                        <span className="text-[10px] text-textSecondary">{new Date(comment.createdAt).toLocaleDateString()}</span>
                                     </div>
                                     <p className="text-xs sm:text-sm text-textSecondary leading-relaxed font-normal">{comment.content}</p>
+                                    
+                                    <div className="flex items-center gap-3 pt-2">
+                                        <button onClick={() => handleLikeComment(comment._id)} className={`text-xs font-semibold flex items-center gap-1 ${session && comment.likes?.includes(session.user?.id as string) ? 'text-accent-red' : 'text-slate-500 hover:text-textPrimary'}`}>
+                                            <Heart className={`w-3.5 h-3.5 ${session && comment.likes?.includes(session.user?.id as string) ? 'fill-accent-red' : ''}`} /> {comment.likes?.length || 0}
+                                        </button>
+                                        <button onClick={() => { setReplyingTo(comment._id); }} className="text-xs font-semibold flex items-center gap-1 text-slate-500 hover:text-textPrimary">
+                                            <Reply className="w-3.5 h-3.5" /> Reply
+                                        </button>
+                                    </div>
+
+                                    {/* INLINE REPLY FORM */}
+                                    {replyingTo === comment._id && (
+                                        <form onSubmit={handleAddComment} className="mt-4 glass-card p-4 rounded-xl border border-gold-200 shadow-sm space-y-3 bg-white">
+                                            <p className="text-xs font-bold text-textPrimary flex items-center gap-2">
+                                                Replying to {comment.user?.name} 
+                                                <button type="button" onClick={()=>setReplyingTo(null)} className="text-xs text-slate-400 hover:text-accent-red ml-auto">Cancel</button>
+                                            </p>
+                                            
+                                            <textarea
+                                                value={newCommentContent}
+                                                onChange={(e) => setNewCommentContent(e.target.value)}
+                                                placeholder="Write your reply..."
+                                                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-textPrimary focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all resize-none min-h-[60px]"
+                                            />
+                                            
+                                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                <div className="scale-75 origin-left">
+                                                    <ReCAPTCHA
+                                                        ref={recaptchaRef}
+                                                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITEKEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                                                        onChange={(val) => setRecaptchaToken(val)}
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="submit"
+                                                    className="bg-gold-500 hover:bg-gold-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                                                    disabled={!session}
+                                                >
+                                                    {session ? "Post Reply" : "Login"} <Send className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+
+                                    {/* Nested Replies */}
+                                    {articleComments.filter(r => r.parentComment === comment._id).map(reply => (
+                                        <div key={reply._id} className="mt-3 ml-6 p-3 rounded-xl bg-white border border-slate-100 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    {reply.user?.image ? (
+                                                        <Image src={reply.user.image} width={20} height={20} alt="Avatar" className="rounded-full" />
+                                                    ) : (
+                                                        <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">{reply.user?.name?.charAt(0)}</div>
+                                                    )}
+                                                    <span className="text-xs font-bold text-textPrimary">{reply.user?.name}</span>
+                                                </div>
+                                                <span className="text-[10px] text-textSecondary">{new Date(reply.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <p className="text-xs text-textSecondary leading-relaxed font-normal">{reply.content}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             ))}
                         </div>
@@ -232,11 +374,17 @@ export default function ClientArticle({ article }: { article: any }) {
                         <div className="space-y-4">
                             <p className="text-xs uppercase tracking-widest font-bold text-gold-600">Overview</p>
                             <ul className="space-y-3 text-xs font-semibold text-textSecondary border-l border-slate-100 pl-4">
-                                <li className="text-gold-600 border-l border-gold-500 -ml-[17px] pl-4 cursor-pointer">Introduction</li>
-                                <li className="hover:text-textPrimary cursor-pointer transition-colors">Technical Architecture</li>
-                                <li className="hover:text-textPrimary cursor-pointer transition-colors">Quantization Metrics</li>
-                                <li className="hover:text-textPrimary cursor-pointer transition-colors">Implementation Pipeline</li>
-                                <li className="hover:text-textPrimary cursor-pointer transition-colors">Summary & Key Takeaways</li>
+                                {headings.length > 0 ? headings.map((heading, idx) => (
+                                    <li 
+                                        key={heading.id} 
+                                        onClick={() => document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' })}
+                                        className={`hover:text-textPrimary cursor-pointer transition-colors ${idx === 0 ? 'text-gold-600 border-l border-gold-500 -ml-[17px] pl-4' : ''}`}
+                                    >
+                                        {heading.text}
+                                    </li>
+                                )) : (
+                                    <li className="text-slate-400 italic">No headings found</li>
+                                )}
                             </ul>
                         </div>
 
