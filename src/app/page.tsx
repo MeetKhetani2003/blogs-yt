@@ -17,7 +17,7 @@ export default async function Home() {
     const videos = await YoutubeVideo.find().sort({ createdAt: -1 }).limit(10).lean();
 
     return (
-        <div className="animate-fadeIn">
+        <div className="animate-fadeIn overflow-hidden">
             {/* SUBTLE BACKDROP AMBIENT GLOW */}
             <div className="absolute top-24 left-1/4 w-[500px] h-[500px] bg-gold-400/10 rounded-full blur-[120px] pointer-events-none animate-pulse-glow"></div>
             <div className="absolute top-[80vh] right-1/4 w-[600px] h-[600px] bg-accent-red/5 rounded-full blur-[150px] pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }}></div>

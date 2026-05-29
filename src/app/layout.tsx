@@ -78,9 +78,17 @@ export const metadata: Metadata = {
     images: ["/og-image.jpg"],
   },
   verification: {
-    google: "google-site-verification-code",
+    google: "google-site-verification-code", // REPLACE with actual code from GSC
   },
   category: "Technology",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo.png", type: "image/png" }
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 import { Toaster } from 'sonner';
@@ -125,7 +133,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col selection:bg-gold-500 selection:text-white">
+      <body className="min-h-screen flex flex-col selection:bg-gold-500 selection:text-white overflow-x-hidden">
         <Providers>
           {/* Custom Animated Cursor Elements (Hidden on mobile) */}
           <div id="cursor-dot" className="custom-cursor hidden md:block" aria-hidden="true"></div>
