@@ -1,4 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import './Category';
+import './Hashtag';
 
 export interface IGalleryImage extends Document {
   title: string;

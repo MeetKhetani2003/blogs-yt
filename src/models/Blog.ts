@@ -1,4 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import './Category';
+import './Hashtag';
+import './User';
 
 export interface IBlog extends Document {
   title: string;

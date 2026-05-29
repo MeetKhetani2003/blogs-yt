@@ -1,4 +1,6 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
+import './Blog';
+import './YoutubeVideo';
 
 export interface IAnalytics extends Document {
   blogId?: mongoose.Types.ObjectId;
