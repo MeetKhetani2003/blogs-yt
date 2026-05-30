@@ -61,3 +61,16 @@ export async function getYoutubeVideos() {
         return { success: false, error: error.message };
     }
 }
+
+export async function deleteYoutubeVideo(id: string) {
+    try {
+        const session = await auth();
+        if (!session || session.user?.role !== 'ADMIN') throw new Error("Unauthorized");
+        
+        await dbConnect();
+        await YoutubeVideo.findByIdAndDelete(id);
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Upload, ImageIcon, File as FileIcon } from 'lucide-react';
+import { Upload, ImageIcon, File as FileIcon, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { getGalleryImages } from '@/actions/gallery';
+import { getGalleryImages, deleteGalleryImage } from '@/actions/gallery';
 
 export default function MediaLibraryPage() {
     const [images, setImages] = useState<any[]>([]); 
@@ -45,6 +45,18 @@ export default function MediaLibraryPage() {
         setUploading(false);
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this media?')) return;
+        toast.loading('Deleting...', { id: 'media-delete' });
+        const res = await deleteGalleryImage(id);
+        if (res.success) {
+            toast.success('Media deleted', { id: 'media-delete' });
+            setImages(images.filter(i => i._id !== id));
+        } else {
+            toast.error(res.error, { id: 'media-delete' });
+        }
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fadeIn">
             <div className="flex items-center justify-between">
@@ -73,6 +85,9 @@ export default function MediaLibraryPage() {
                             <div key={img._id} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-slate-50">
                                 <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                                    <button onClick={() => handleDelete(img._id)} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
                                     <p className="text-[10px] text-white font-bold truncate">{img.title}</p>
                                     <p className="text-[9px] text-slate-300">{(img.sizeBytes / 1024).toFixed(1)} KB</p>
                                 </div>

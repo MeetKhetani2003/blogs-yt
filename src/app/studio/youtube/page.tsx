@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { getYoutubeVideos, addYoutubeVideo } from '@/actions/youtube';
+import { getYoutubeVideos, addYoutubeVideo, deleteYoutubeVideo } from '@/actions/youtube';
 import { toast } from 'sonner';
-import { Video as Youtube, Plus, Play, ExternalLink } from 'lucide-react';
+import { Video as Youtube, Plus, Play, ExternalLink, Trash2 } from 'lucide-react';
 
 export default function YoutubeStudioPage() {
     const [videos, setVideos] = useState<any[]>([]);
@@ -31,6 +31,18 @@ export default function YoutubeStudioPage() {
             fetchVideos();
         } else {
             toast.error(res.error);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this video?')) return;
+        toast.loading('Deleting...', { id: 'yt-delete' });
+        const res = await deleteYoutubeVideo(id);
+        if (res.success) {
+            toast.success('Video deleted', { id: 'yt-delete' });
+            setVideos(videos.filter(v => v._id !== id));
+        } else {
+            toast.error(res.error, { id: 'yt-delete' });
         }
     };
 
@@ -71,6 +83,9 @@ export default function YoutubeStudioPage() {
                                 <a href={video.url} target="_blank" rel="noreferrer" className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white pl-1">
                                     <Play className="w-4 h-4" />
                                 </a>
+                                <button onClick={() => handleDelete(video._id)} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
                         <div className="p-4 space-y-1">

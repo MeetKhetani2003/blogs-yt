@@ -21,19 +21,7 @@ export default async function StudioDashboard() {
     const allBlogs = await Blog.find().select('views').lean();
     const totalViews = allBlogs.reduce((acc, curr) => acc + (curr.views || 0), 0);
 
-    // Actual storage metrics for MongoDB GridFS
-    let actualStorageBytes = 0;
-    try {
-        const files = await mongoose.connection.db?.collection('uploads.files').find().toArray();
-        if (files) {
-            actualStorageBytes = files.reduce((acc, curr) => acc + (curr.length || 0), 0);
-        }
-    } catch (e) {
-        console.error("Failed to fetch GridFS size:", e);
-    }
-    const storageUsedMB = (actualStorageBytes / (1024 * 1024)).toFixed(2);
-    const storageLimitMB = 512; // Free tier
-    const storagePercent = (parseFloat(storageUsedMB) / storageLimitMB) * 100;
+    // GridFS storage monitor logic removed as requested
 
     return (
         <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fadeIn w-full flex-grow">
@@ -87,34 +75,7 @@ export default async function StudioDashboard() {
                 </div>
             </div>
 
-            {/* STORAGE RESOURCE MONITOR */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                    <HardDrive className="w-5 h-5 text-slate-500" />
-                    <h3 className="text-lg font-bold text-textPrimary">GridFS Storage Monitor</h3>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-slate-600">Storage Used</span>
-                        <span className="font-bold text-textPrimary">{storageUsedMB} MB / {storageLimitMB} MB</span>
-                    </div>
-                    
-                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                            className={`h-full rounded-full transition-all duration-1000 ${storagePercent > 90 ? 'bg-red-500' : storagePercent > 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${Math.min(storagePercent, 100)}%` }}
-                        ></div>
-                    </div>
-
-                    {storagePercent > 90 && (
-                        <div className="p-4 bg-red-50 text-red-700 text-sm font-semibold rounded-xl border border-red-100 flex items-start gap-3">
-                            <Database className="w-5 h-5 shrink-0" />
-                            <p>CRITICAL ALERT: Database storage is exceeding 90% capacity. Please remove unused media or upgrade your MongoDB cluster tier.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
+            {/* STORAGE RESOURCE MONITOR REMOVED */}
         </div>
     );
 }

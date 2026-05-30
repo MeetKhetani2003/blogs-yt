@@ -5,9 +5,30 @@ import { Blog, IBlog } from "@/models/Blog";
 import { Category } from "@/models/Category";
 import { Hashtag } from "@/models/Hashtag";
 import { User } from "@/models/User";
+import { GalleryImage } from "@/models/GalleryImage";
 import slugify from "slugify";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import mongoose from "mongoose";
+
+async function deleteMediaByUrl(url?: string) {
+    if (!url || !url.startsWith('/api/media/')) return;
+    try {
+        const fileId = url.split('/').pop();
+        if (!fileId) return;
+        
+        await dbConnect();
+        await GalleryImage.deleteOne({ url });
+        
+        const db = mongoose.connection.db;
+        if (db) {
+            const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'media' });
+            await bucket.delete(new mongoose.mongo.ObjectId(fileId));
+        }
+    } catch (e) {
+        console.error("Error deleting media:", e);
+    }
+}
 
 export async function createBlog(data: Partial<IBlog>) {
     try {
@@ -52,6 +73,11 @@ export async function updateBlog(id: string, data: Partial<IBlog>) {
         
         if (data.title && !data.slug) {
             data.slug = slugify(data.title, { lower: true, strict: true });
+        }
+
+        const existingBlog = await Blog.findById(id);
+        if (existingBlog && data.heroImage !== undefined && existingBlog.heroImage !== data.heroImage) {
+            await deleteMediaByUrl(existingBlog.heroImage);
         }
 
         const updatedBlog = await Blog.findByIdAndUpdate(id, data, { new: true });
@@ -108,6 +134,10 @@ export async function deleteBlog(id: string) {
             throw new Error("Unauthorized");
         }
         await dbConnect();
+        const existingBlog = await Blog.findById(id);
+        if (existingBlog && existingBlog.heroImage) {
+            await deleteMediaByUrl(existingBlog.heroImage);
+        }
         await Blog.findByIdAndDelete(id);
         revalidatePath('/');
         revalidatePath('/publications');
