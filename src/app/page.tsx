@@ -95,6 +95,7 @@ export default async function Home() {
                                     width={310} height={430}
                                     src="/avatar.jpeg"
                                     alt="Technical Rahul Pandey Creator Portrait"
+                                    priority={true}
                                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 opacity-95"
                                 />
 
@@ -227,6 +228,7 @@ export default async function Home() {
                                 <Image
                                     fill
                                     src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80"
+                                    sizes="(max-width: 1024px) 100vw, 60vw"
                                     className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
                                     alt="PlaySquare featured preview"
                                 />

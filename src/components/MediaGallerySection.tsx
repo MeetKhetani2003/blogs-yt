@@ -49,9 +49,11 @@ export default function MediaGallerySection({ images, videos }: { images: any[],
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-max mb-10">
                         {displayImages.map((img: any) => (
                             <div key={img._id} className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group bg-slate-200 aspect-square md:aspect-video">
-                                <img 
+                                <Image 
+                                    fill
                                     src={img.url} 
                                     alt={img.title} 
+                                    sizes="(max-width: 768px) 50vw, 33vw"
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
@@ -72,9 +74,11 @@ export default function MediaGallerySection({ images, videos }: { images: any[],
                                 rel="noreferrer" 
                                 className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 group bg-slate-900 block aspect-video"
                             >
-                                <img 
+                                <Image 
+                                    fill
                                     src={vid.thumbnail} 
                                     alt={vid.title} 
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                     className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" 
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center">

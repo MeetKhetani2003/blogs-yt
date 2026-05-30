@@ -36,7 +36,7 @@ export default function ClientHeader() {
                 <header className="w-full max-w-7xl bg-white/95 backdrop-blur-2xl rounded-2xl border border-slate-200/80 px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.08)] pointer-events-auto transition-all">
                     <Link href="/" className="flex items-center gap-3 cursor-pointer group">
                         <div className="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <Image width={40} height={40} src="/logo.png" alt="Technical Rahul Pandey Logo" className="w-full h-full object-contain" />
+                            <Image width={40} height={40} priority src="/logo.png" alt="Technical Rahul Pandey Logo" className="w-full h-full object-contain" />
                         </div>
                         <div>
                             <h1 className="text-sm font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
