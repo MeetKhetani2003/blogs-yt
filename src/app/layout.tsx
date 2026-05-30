@@ -83,7 +83,6 @@ export const metadata: Metadata = {
   category: "Technology",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
       { url: "/logo.png", type: "image/png" }
     ],
     shortcut: "/logo.png",
@@ -112,7 +111,7 @@ export default async function RootLayout({
     logo: "https://technicalrahul.com/logo.png",
     founder: {
       "@type": "Person",
-      name: "Rahul Pandey",
+      name: "Technical Rahul Pandey",
       jobTitle: "Chief Content Architect",
     },
     sameAs: [
@@ -139,7 +138,7 @@ export default async function RootLayout({
           <div id="cursor-dot" className="custom-cursor hidden md:block" aria-hidden="true"></div>
           <div id="cursor-glow" className="custom-cursor-glow hidden md:block" aria-hidden="true"></div>
           <ClientHeader />
-          
+
           {children}
           <Toaster position="top-center" richColors theme="light" />
           <ClientFooter />

@@ -40,7 +40,7 @@ export default function ClientHeader() {
                         </div>
                         <div>
                             <h1 className="text-sm font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-                                Technical Rahul
+                                Technical Rahul Pandey
                                 <span className="bg-gold-50 text-gold-600 text-[9px] font-bold px-2 py-0.5 rounded-full border border-gold-400/30">PRO</span>
                             </h1>
                             <p className="text-[9px] text-slate-500 uppercase tracking-widest font-semibold">Architecture</p>

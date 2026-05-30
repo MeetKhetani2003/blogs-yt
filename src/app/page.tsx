@@ -101,7 +101,7 @@ export default async function Home() {
 
                                 {/* Dark Vignette Overlay with textual typography branding */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent flex flex-col justify-end p-6">
-                                    <h4 className="text-white text-lg font-bold">Rahul Pandey</h4>
+                                    <h4 className="text-white text-lg font-bold">Technical Rahul Pandey</h4>
                                     <p className="text-gold-400 text-xs font-medium">Founder & Technical Architect</p>
                                 </div>
                             </div>
@@ -297,7 +297,7 @@ export default async function Home() {
                         <p className="text-xs uppercase tracking-widest font-bold text-gold-600">The Journey</p>
                         <h3 className="text-2xl sm:text-3xl font-bold text-textPrimary">Deconstructing the Authority</h3>
                         <p className="text-sm text-textSecondary font-normal leading-relaxed">
-                            How Rahul Pandey simplified complex computing algorithms to design an inclusive visual creator space for millions of engineers globally.
+                            How Technical Rahul Pandey simplified complex computing algorithms to design an inclusive visual creator space for millions of engineers globally.
                         </p>
                     </div>
 
